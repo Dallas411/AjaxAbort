@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Page - AjaxAbort</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">AjaxAbort</a>
+
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+        <input type="button" id="cancelBtn" value="Cancel All AJAX" />
+        <div id="foo">waiting.....</div>
+        <div class="text-center" id="dummy">
+            
+        </div>
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2019 - AjaxAbort
+        </div>
+    </footer>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="text/javascript">
+        $.xhrPool = [];
+        $.xhrPool.abortAll = function () {
+            $(this).each(function (idx, jqXHR) {
+                jqXHR.abort();
+            });
+            $.xhrPool = [];
+        };
+
+
+        $.ajaxSetup({
+            beforeSend: function (jqXHR) {
+                $.xhrPool.push(jqXHR);
+            },
+            complete: function (jqXHR) {
+                var index = $.xhrPool.indexOf(jqXHR);
+                if (index > -1) {
+                    $.xhrPool.splice(index, 1);
+                }
+            }
+        })
+
+        $(document).ready(function () {
+            multi();
+        });
+
+        function multi() {
+            $.ajax({
+                url: 'http://dummy.restapiexample.com/api/v1/employees',
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Access-Control-Allow-Origin': '*'
+                },
+                success: function (data) {
+                    jQuery.each(data, function (i, val) {
+                        if (i<30) {
+                            single(val.id);
+                            $("#dummy").append(i + "->" + val.employee_name + " - " + val.employee_age + "</BR>");
+                        }
+                    });
+                },
+                error: function (request, error) {
+                    console.log("Error Request in multi: " + JSON.stringify(request));
+                }
+            });
+        }
+
+        function single(id) {
+            $.ajax({
+                url: 'http://dummy.restapiexample.com/api/v1/employee/' + id,
+                type: 'GET',
+                dataType: 'json',
+                headers: {
+                    'Access-Control-Allow-Origin': '*'
+                },
+                success: function (data) {
+                   $("#foo").html(data.employee_name);
+                },
+                error: function (request, error) {
+                    console.log("Error Request in single: " + JSON.stringify(request));
+                }
+            });
+        }
+
+        $('#cancelBtn').click(function () {
+            $.xhrPool.abortAll();
+        });
+    </script>
+
+</body>
+</html>
