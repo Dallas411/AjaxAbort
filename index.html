@@ -73,7 +73,7 @@
                     jQuery.each(data, function (i, val) {
                         if (i<30) {
                             single(val.id);
-                            $("#dummy").append(i + "->" + val.employee_name + " - " + val.employee_age + "</BR>");
+                            $("#dummy").append(i + "->" + val.id + " " + val.employee_name + " - " + val.employee_age + "</BR>");
                         }
                     });
                 },
@@ -84,6 +84,7 @@
         }
 
         function single(id) {
+            console.log("start single with id:" + id);
             $.ajax({
                 url: 'http://dummy.restapiexample.com/api/v1/employee/' + id,
                 type: 'GET',
